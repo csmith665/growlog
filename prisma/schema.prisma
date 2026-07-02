@@ -23,13 +23,28 @@ model GardenPlant {
   matureHeight    Float?
   matureSpread    Float?
   daysToHarvest   Int?
+  spacingInches   Int?
+  germinationDaysMin Int?
+  germinationDaysMax Int?
   isEdible        Boolean  @default(false)
   isPerennial     Boolean  @default(false)
   bloomSeason     String?
+  nativeRegion    String?
   companionPlants String[]
   avoidPlants     String[]
   careDifficulty  Difficulty
   tags            String[]
+
+  // Detailed care information for success
+  plantingGuide   String?
+  wateringGuide   String?
+  fertilizingGuide String?
+  pruningGuide    String?
+  pestDiseaseGuide String?
+  harvestingGuide String?
+  overwinteringGuide String?
+  generalCareTips String?
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
