@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model GardenPlant {
+  id              String   @id @default(cuid())
+  name            String
+  scientificName  String?
+  category        GardenPlantCategory
+  description     String?
+  imageUrl        String?
+  lightRequirement GardenLightLevel
+  waterNeeds      WaterNeeds
+  soilType        SoilType[]
+  hardinessZoneMin Int?
+  hardinessZoneMax Int?
+  growthRate      GardenGrowthRate?
+  matureHeight    Float?
+  matureSpread    Float?
+  daysToHarvest   Int?
+  isEdible        Boolean  @default(false)
+  isPerennial     Boolean  @default(false)
+  bloomSeason     String?
+  companionPlants String[]
+  avoidPlants     String[]
+  careDifficulty  Difficulty
+  tags            String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  instances       TrackedPlant[]
+}
+
+enum GardenPlantCategory {
+  FLOWER
+  VEGETABLE
+  HERB
+  FRUIT
+  SHRUB
+  TREE
+  SUCCULENT
+  GRASS
+  VINE
+  GROUND_COVER
+  OTHER
+}
+
+enum GardenLightLevel {
+  FULL_SUN
+  PARTIAL_SUN
+  PARTIAL_SHADE
+  FULL_SHADE
+}
+
+enum WaterNeeds {
+  DROUGHT_TOLERANT
+  LOW
+  MODERATE
+  HIGH
+  WET
+}
+
+enum SoilType {
+  SANDY
+  LOAMY
+  CLAY
+  CHALKY
+  PEATY
+  SILTY
+}
+
+enum GardenGrowthRate {
+  SLOW
+  MODERATE
+  FAST
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model GardenBed {
+  id              String   @id @default(cuid())
+  name            String
+  type            GardenBedType
+  width           Float
+  length          Float
+  depth           Float?
+  soilType        SoilType?
+  sunExposure     GardenLightLevel?
+  hardinessZone   Int?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  plants          TrackedPlant[]
+  careLogs        GardenCareLog[]
+}
+
+enum GardenBedType {
+  RAISED_BED
+  IN_GROUND
+  CONTAINER
+  HANGING
+  VERTICAL
+  GREENHOUSE
+  HYDROPONIC
+}
+
+model TrackedPlant {
+  id              String   @id @default(cuid())
+  gardenPlantId   String
+  gardenBedId     String?
+  name            String?
+  quantity        Int      @default(1)
+  datePlanted     DateTime?
+  dateGerminated  DateTime?
+  dateTransplanted DateTime?
+  dateHarvested   DateTime?
+  status          PlantStatus @default(PLANNED)
+  healthStatus    PlantHealthStatus @default(HEALTHY)
+  x               Float?
+  y               Float?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  gardenPlant     GardenPlant @relation(fields: [gardenPlantId], references: [id])
+  gardenBed       GardenBed?  @relation(fields: [gardenBedId], references: [id])
+  careLogs        GardenCareLog[]
+}
+
+enum PlantStatus {
+  PLANNED
+  SEEDLING
+  GERMINATED
+  TRANSPLANTED
+  GROWING
+  FLOWERING
+  FRUITING
+  HARVESTED
+  DORMANT
+  DEAD
+}
+
+enum PlantHealthStatus {
+  HEALTHY
+  STRESSED
+  PEST_DAMAGE
+  DISEASE
+  NUTRIENT_DEFICIENCY
+  DEAD
+}
+
+model GardenCareLog {
+  id              String   @id @default(cuid())
+  gardenBedId     String?
+  trackedPlantId  String?
+  date            DateTime @default(now())
+  type            GardenCareType
+  description     String?
+  amount          String?
+
+  gardenBed       GardenBed?    @relation(fields: [gardenBedId], references: [id], onDelete: Cascade)
+  trackedPlant    TrackedPlant? @relation(fields: [trackedPlantId], references: [id], onDelete: Cascade)
+}
+
+enum GardenCareType {
+  WATERING
+  FERTILIZING
+  PRUNING
+  WEEDING
+  PEST_CONTROL
+  HARVESTING
+  PLANTING
+  TRANSPLANTING
+  SOIL_AMENDMENT
+  MULCHING
+  OTHER
+}
